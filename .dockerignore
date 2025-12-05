@@ -1,0 +1,54 @@
+# Git
+.git
+.gitignore
+
+# Documentation
+README.md
+TESTING.md
+MIGRATION_GUIDE.md
+*.md
+
+# Development files
+.env
+.env.local
+.env.example
+docker-compose.yml
+docker-compose.*.yml
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Test files
+*_test.go
+test/
+tests/
+
+# Build artifacts
+main
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Temporary files
+tmp/
+temp/
+
+# Scripts
+scripts/migrate_users.py
+scripts/*.sql
+
+# Examples
+examples/
