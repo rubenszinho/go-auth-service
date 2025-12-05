@@ -17,10 +17,9 @@ type redisClient struct {
 }
 
 func RedisClient(cfg *config.Config) (*redisClient, error) {
-	opts := &redis.Options{
-		Addr:     fmt.Sprintf("%s:%s", cfg.Redis.Host, cfg.Redis.Port),
-		Password: cfg.Redis.Password,
-		DB:       cfg.Redis.DB,
+	opts, err := redis.ParseURL(cfg.Redis.URL)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse Redis URL: %w", err)
 	}
 
 	client := redis.NewClient(opts)

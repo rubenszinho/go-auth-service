@@ -28,12 +28,7 @@ type ServerConfig struct {
 }
 
 type DatabaseConfig struct {
-	Host     string
-	Port     string
-	User     string
-	Password string
-	Name     string
-	SSLMode  string
+	URL string
 }
 
 type JWTConfig struct {
@@ -64,10 +59,7 @@ type SecurityConfig struct {
 }
 
 type RedisConfig struct {
-	Host     string
-	Port     string
-	Password string
-	DB       int
+	URL string
 }
 
 type LoggingConfig struct {
@@ -88,12 +80,7 @@ func Load() (*Config, error) {
 			AuthFrontendURL: getEnvWithDefault("AUTH_FRONTEND_URL", "https://your-auth-frontend-url.com"),
 		},
 		Database: DatabaseConfig{
-			Host:     getEnvRequired("DB_HOST", "Database host"),
-			Port:     getEnvRequired("DB_PORT", "Database port"),
-			User:     getEnvRequired("DB_USER", "Database user"),
-			Password: getEnvRequired("DB_PASSWORD", "Database password"),
-			Name:     getEnvRequired("DB_NAME", "Database name"),
-			SSLMode:  getEnvRequired("DB_SSL_MODE", "Database SSL mode (require/disable)"),
+			URL: getEnvRequired("DATABASE_URL", "PostgreSQL connection string (postgresql://user:password@host:port/dbname?sslmode=require)"),
 		},
 		JWT: JWTConfig{
 			Secret:        getEnvRequired("JWT_SECRET", "JWT signing secret - CRITICAL FOR SECURITY"),
@@ -102,7 +89,7 @@ func Load() (*Config, error) {
 		},
 		OAuth: OAuthConfig{
 			Google: OAuthProvider{
-				ClientID:     getEnv("GOOGLE_CLIENT_ID"), // OAuth is optional
+				ClientID:     getEnv("GOOGLE_CLIENT_ID"),
 				ClientSecret: getEnv("GOOGLE_CLIENT_SECRET"),
 				RedirectURL:  getEnv("GOOGLE_REDIRECT_URL"),
 			},
@@ -126,10 +113,7 @@ func Load() (*Config, error) {
 			AllowedEmailDomains:     parseStringSlice(getEnv("ALLOWED_EMAIL_DOMAINS")),
 		},
 		Redis: RedisConfig{
-			Host:     getEnvRequired("REDIS_HOST", "Redis host"),
-			Port:     getEnvRequired("REDIS_PORT", "Redis port"),
-			Password: getEnvRequired("REDIS_PASSWORD", "Redis password"),
-			DB:       parseIntRequired(getEnvRequired("REDIS_DB", "Redis database number (e.g., 0)")),
+			URL: getEnvRequired("REDIS_URL", "Redis connection string (redis://:password@host:port/0)"),
 		},
 		Logging: LoggingConfig{
 			Level:  getEnvRequired("LOG_LEVEL", "Logging level (debug/info/warning/error)"),
@@ -173,10 +157,6 @@ func (c *Config) Validate() error {
 		return fmt.Errorf("BCRYPT_COST must be between 10 and 15, got: %d", c.Security.BcryptCost)
 	}
 
-	if c.Redis.DB < 0 {
-		return fmt.Errorf("REDIS_DB must be >= 0, got: %d", c.Redis.DB)
-	}
-
 	if c.Security.RateLimitRequests <= 0 {
 		return fmt.Errorf("RATE_LIMIT_REQUESTS must be > 0, got: %d", c.Security.RateLimitRequests)
 	}
@@ -186,14 +166,7 @@ func (c *Config) Validate() error {
 }
 
 func (c *Config) GetDSN() string {
-	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
-		c.Database.Host,
-		c.Database.Port,
-		c.Database.User,
-		c.Database.Password,
-		c.Database.Name,
-		c.Database.SSLMode,
-	)
+	return c.Database.URL
 }
 
 func getEnv(key string) string {
