@@ -53,6 +53,7 @@ func New(cfg *config.Config) (*Database, error) {
 func (d *Database) Migrate() error {
 	return d.DB.AutoMigrate(
 		&models.User{},
+		&models.AuthSession{},
 		&models.OAuthAccount{},
 		&models.RefreshToken{},
 		&models.PasswordReset{},

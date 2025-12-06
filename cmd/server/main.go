@@ -44,6 +44,12 @@ func main() {
 	}
 	defer db.Close()
 
+	logger.Info("Running database migrations...")
+	if err := db.Migrate(); err != nil {
+		logger.Fatal("Failed to run database migrations", zap.Error(err))
+	}
+	logger.Info("Database migrations completed successfully")
+
 	jwtManager := jwt.JWTManager(
 		cfg.JWT.Secret,
 		cfg.JWT.Expiry,
